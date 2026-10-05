@@ -8,7 +8,7 @@ hero:
   actions:
     - theme: brand
       text: Ver Práctica 1 (Aspiradora)
-      link: /practica-1-aspiradora
+      link: /practica-1
     - theme: alt
       text: Código en GitHub
       link: https://github.com/JaviSVJ/ROBOTICAMOVILPRACT
