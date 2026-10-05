@@ -1,0 +1,78 @@
+import WebGUI
+import HAL
+import Frequency
+import math
+import random
+import time
+
+# Inicialización de variables 
+estado_actual = "ESPIRAL" 
+velocidad_espiral = 0.1
+
+# Para no usar sleep (prohibido) utilizamos estas variabes de memoria.
+tiempo_inicio_retroceso = 0.0
+angulo_objetivo = 0.0
+direccion_giro = 1
+
+def obtener_distancia_frontal():
+    """Lee ÚNICAMENTE el láser central (índice 90) tal y como pide la práctica."""
+    datos_laser = HAL.getLaserData()
+    if datos_laser and len(datos_laser.values) > 0:
+        return datos_laser.values[90] 
+    return 10.0
+
+print("Iniciando autómata aspirador")
+
+# Bucle infinito principal
+while True:
+    Frequency.tick(50)  # Frecuencia constante sin parar de 50HZ
+    
+    # 1. Lectura de sensores reactiva constante
+    distancia_frente = obtener_distancia_frontal()
+    yaw_actual = HAL.getPose3d().yaw
+    
+    # 2. Cambio forzoso (evitamos choque frontal)
+    # Ampliamos el margen a 0.7m. Como el láser 90 es muy fino, necesitamos
+    # este margen extra para que los bordes del robot no choquen al ir en diagonal.
+    if distancia_frente < 0.3 and estado_actual not in ["RETROCEDIENDO", "GIRANDO"]:
+        estado_actual = "RETROCEDIENDO"
+        tiempo_inicio_retroceso = time.time()  
+        
+    # 3. Máquina de estados:
+    if estado_actual == "ESPIRAL":
+        # Tope máximo rebajado a 0.5 para no ganar inercia excesiva
+        if velocidad_espiral < 0.50:
+            velocidad_espiral += 0.0005 
+            HAL.setV(velocidad_espiral)
+            HAL.setW(0.7) 
+        else:
+            estado_actual = "AVANZANDO"
+            velocidad_espiral = 0.1 
+            
+    elif estado_actual == "AVANZANDO":
+        # Velocidad en línea recta ligeramente menor para asegurar frenada a tiempo
+        HAL.setV(0.4)
+        HAL.setW(0.0)
+        
+    elif estado_actual == "RETROCEDIENDO":
+        HAL.setV(-0.4)
+        HAL.setW(0.0)
+        
+        if time.time() - tiempo_inicio_retroceso > 0.6: 
+            estado_actual = "GIRANDO"
+            
+            giro_rad = random.uniform(1.5, 2.8)
+            direccion_giro = random.choice([-1, 1])
+            angulo_objetivo = yaw_actual + (giro_rad * direccion_giro)
+            
+            angulo_objetivo = math.atan2(math.sin(angulo_objetivo), math.cos(angulo_objetivo))
+            
+    elif estado_actual == "GIRANDO":
+        HAL.setV(0.0)
+        HAL.setW(1.0 * direccion_giro)
+        
+        diferencia_angular = abs(math.atan2(math.sin(angulo_objetivo - yaw_actual), math.cos(angulo_objetivo - yaw_actual)))
+        
+        if diferencia_angular < 0.15:
+            estado_actual = random.choice(["ESPIRAL", "AVANZANDO"])
+            velocidad_espiral = 0.1
