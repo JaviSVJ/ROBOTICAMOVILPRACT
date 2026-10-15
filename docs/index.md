@@ -7,7 +7,7 @@ hero:
   tagline: "Repositorio oficial de algoritmos y navegación autónoma en Unibotics"
   actions:
     - theme: brand
-      text: Ver Práctica 1 (Aspiradora)
+      text: Ver Prácticas
       link: /practica-1
     - theme: alt
       text: Código en GitHub
