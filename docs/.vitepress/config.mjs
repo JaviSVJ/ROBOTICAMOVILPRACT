@@ -17,7 +17,8 @@ export default defineConfig({
         text: 'Memorias del Curso',
         items: [
           { text: 'Práctica 1: Aspirador autónomo', link: '/practica-1' },
-          { text: 'Práctica 2: Sigue-líneas', link: '/practica-2' }
+          { text: 'Práctica 2: Sigue-líneas', link: '/practica-2' },
+          { text: 'Práctica 3: Evita obstáculos', link: '/practica-3' },
         ]
       }
     ],
