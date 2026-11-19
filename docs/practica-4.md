@@ -67,12 +67,12 @@ Este fragmento muestra el núcleo de la planificación integrada sin mínimos lo
 
 ## 4 Problemas Encontrados y Soluciones
 
- Problema 1: Mínimos locales y bloqueo girando en cruces
-**Problema:** Al sumar el subcampo de penalización de paredes despues de calcular la distancia al destino, en calles estrechas o intersecciones se generaban «baches» de potencial donde el gradiente apuntaba a la propia celda del coche, dejándolo dando vueltas sobre sí mismo en el pasillo principal.
+Mínimos locales y bloqueo girando en cruces : Al sumar el subcampo de penalización de paredes despues de calcular la distancia al destino, en calles estrechas o intersecciones se generaban «baches» de potencial donde el gradiente apuntaba a la propia celda del coche, dejándolo dando vueltas sobre sí mismo en el pasillo principal.
+
 **Solución:** Se integró la penalización de las paredes (`subcampo_obs`) directamente dentro de la propagación de costes de la onda (`nd = d0 + coste + subcampo_obs[nr, nc]`) y se sustituyó la ventana cuadrada de búsqueda por un descenso encadenado de 5 pasos (`seguir_gradiente`).
 
- Problema 2: Alineación de ejes Gazebo-Matriz y tiempo de cómputo
-**Problema:** En el mundo `cityLarge` ($500 \times 500\text{ m}$ centrado en `(0, 0)`), los ejes del mundo están orientados con `world_x` hacia las filas y `world_y` hacia las columnas de la imagen de $400 \times 400$ píxeles. Además, iterar celda a celda sobre matrices NumPy en Python puro ralentizaba la planificación inicial.
+Alineación de ejes Gazebo-Matriz y tiempo de cómputo : En el mundo `cityLarge` (, los ejes del mundo están orientados con `world_x` hacia las filas y `world_y` hacia las columnas de la imagen de $400 \times 400$ píxeles. Además, iterar celda a celda sobre matrices NumPy en Python puro ralentizaba la planificación inicial.
+
 **Solución:** Se calibró la transformación (`OFFSET_M = 250.0`, `PX_POR_M = 0.8`) con `world_x` mapeado a filas y `world_y` a columnas, y se vectorizó el cálculo de distancias a muros con NumPy junto a una cola `deque` nativa, logrando una planificación fluida y en tiempo real.
 
 
